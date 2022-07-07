@@ -10,7 +10,7 @@ steps:
     GO111MODULE: on
   commands:
   - go get -d -t ./...
-  - go build
+  # - go build
   # - go test -cover
   - go test -v ./...
   when:
