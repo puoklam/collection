@@ -11,7 +11,7 @@ steps:
   commands:
   - go get -d -t ./...
   - go build
-  - go test -cover
+  # - go test -cover
   - go test -v ./...
   when:
     branch:
