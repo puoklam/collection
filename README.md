@@ -1,5 +1,6 @@
 # collection
-A collections of data structures and utilities written in Go
+[![GoDoc Widget]][GoDoc]
+Collections of data structures and utilities written in Go
 
 ## Install
 

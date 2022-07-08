@@ -98,7 +98,10 @@ func (s *safeSet[T]) Diff(ss Set[T]) Set[T] {
 }
 
 func (s *safeSet[T]) Items() []T {
-	return s.keys
+	// return append(s.keys[:0:0], s.keys...)
+	items := make([]T, len(s.keys))
+	copy(items, s.keys)
+	return items
 }
 
 func (s *safeSet[T]) String() string {

@@ -88,9 +88,9 @@ func isDisjoint[T comparable](s1, s2 Set[T]) bool {
 }
 
 func Copy[T comparable](s Set[T]) Set[T] {
-	if l, ok := s.(locker); ok {
-		l.Lock()
-		defer l.Unlock()
+	if l, ok := s.(rwLocker); ok {
+		l.RLock()
+		defer l.RUnlock()
 	}
 	m := make(map[T]int)
 	for i, v := range s.Items() {
