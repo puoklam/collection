@@ -2,18 +2,22 @@ package set
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 type unsafeSet[T comparable] struct {
 	keys []T
 	m    map[T]int
+	r    *rand.Rand
 }
 
 func NewUnSafe[T comparable](eles ...T) *unsafeSet[T] {
 	s := &unsafeSet[T]{
 		keys: make([]T, 0),
 		m:    make(map[T]int),
+		r:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 	s.Add(eles...)
 	return s
@@ -67,23 +71,23 @@ func (s *unsafeSet[T]) Clear() {
 	s.keys = nil
 }
 
-func (s *unsafeSet[T]) IsSubset(ss Set[T]) bool {
+func (s *unsafeSet[T]) IsSubset(ss Interface[T]) bool {
 	return isSubset[T](s, ss)
 }
 
-func (s *unsafeSet[T]) IsSuperset(ss Set[T]) bool {
+func (s *unsafeSet[T]) IsSuperset(ss Interface[T]) bool {
 	return ss.IsSubset(s)
 }
 
-func (s *unsafeSet[T]) IsIdentical(ss Set[T]) bool {
+func (s *unsafeSet[T]) IsIdentical(ss Interface[T]) bool {
 	return s.IsSubset(ss) && s.IsSuperset(ss)
 }
 
-func (s *unsafeSet[T]) IsDisjoint(ss Set[T]) bool {
+func (s *unsafeSet[T]) IsDisjoint(ss Interface[T]) bool {
 	return isDisjoint[T](s, ss)
 }
 
-func (s *unsafeSet[T]) Diff(ss Set[T]) Set[T] {
+func (s *unsafeSet[T]) Diff(ss Interface[T]) Interface[T] {
 	return diff[T](s, ss)
 }
 
@@ -99,4 +103,12 @@ func (s *unsafeSet[T]) String() string {
 		eles = append(eles, fmt.Sprintf("%v", v))
 	}
 	return "[" + strings.Join(eles, " ") + "]"
+}
+
+func (s *unsafeSet[T]) Seed(seed int64) {
+	s.r.Seed(seed)
+}
+
+func (s *unsafeSet[T]) Random() T {
+	return s.keys[s.r.Intn(s.Len())]
 }

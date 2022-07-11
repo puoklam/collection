@@ -1,21 +1,28 @@
 package set
 
 import (
+	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 	"sync"
+	"time"
 )
+
+var ErrEmpty = errors.New("Set empty")
 
 type safeSet[T comparable] struct {
 	sync.RWMutex
 	keys []T
 	m    map[T]int
+	r    *rand.Rand
 }
 
 func NewSafe[T comparable](eles ...T) *safeSet[T] {
 	s := &safeSet[T]{
 		keys: make([]T, 0),
 		m:    make(map[T]int),
+		r:    rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 	s.Add(eles...)
 	return s
@@ -77,23 +84,23 @@ func (s *safeSet[T]) Clear() {
 	s.keys = nil
 }
 
-func (s *safeSet[T]) IsSubset(ss Set[T]) bool {
+func (s *safeSet[T]) IsSubset(ss Interface[T]) bool {
 	return isSubset[T](s, ss)
 }
 
-func (s *safeSet[T]) IsSuperset(ss Set[T]) bool {
+func (s *safeSet[T]) IsSuperset(ss Interface[T]) bool {
 	return ss.IsSubset(s)
 }
 
-func (s *safeSet[T]) IsIdentical(ss Set[T]) bool {
+func (s *safeSet[T]) IsIdentical(ss Interface[T]) bool {
 	return s.IsSubset(ss) && s.IsSuperset(ss)
 }
 
-func (s *safeSet[T]) IsDisjoint(ss Set[T]) bool {
+func (s *safeSet[T]) IsDisjoint(ss Interface[T]) bool {
 	return isDisjoint[T](s, ss)
 }
 
-func (s *safeSet[T]) Diff(ss Set[T]) Set[T] {
+func (s *safeSet[T]) Diff(ss Interface[T]) Interface[T] {
 	return diff[T](s, ss)
 }
 
@@ -112,4 +119,14 @@ func (s *safeSet[T]) String() string {
 		eles = append(eles, fmt.Sprintf("%v", v))
 	}
 	return "[" + strings.Join(eles, " ") + "]"
+}
+
+func (s *safeSet[T]) Seed(seed int64) {
+	s.r.Seed(seed)
+}
+
+func (s *safeSet[T]) Random() T {
+	s.RLock()
+	defer s.RUnlock()
+	return s.keys[s.r.Intn(s.Len())]
 }
