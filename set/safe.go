@@ -84,23 +84,23 @@ func (s *safeSet[T]) Clear() {
 	s.keys = nil
 }
 
-func (s *safeSet[T]) IsSubset(ss Interface[T]) bool {
+func (s *safeSet[T]) IsSubset(ss Set[T]) bool {
 	return isSubset[T](s, ss)
 }
 
-func (s *safeSet[T]) IsSuperset(ss Interface[T]) bool {
+func (s *safeSet[T]) IsSuperset(ss Set[T]) bool {
 	return ss.IsSubset(s)
 }
 
-func (s *safeSet[T]) IsIdentical(ss Interface[T]) bool {
+func (s *safeSet[T]) IsIdentical(ss Set[T]) bool {
 	return s.IsSubset(ss) && s.IsSuperset(ss)
 }
 
-func (s *safeSet[T]) IsDisjoint(ss Interface[T]) bool {
+func (s *safeSet[T]) IsDisjoint(ss Set[T]) bool {
 	return isDisjoint[T](s, ss)
 }
 
-func (s *safeSet[T]) Diff(ss Interface[T]) Interface[T] {
+func (s *safeSet[T]) Diff(ss Set[T]) Set[T] {
 	return diff[T](s, ss)
 }
 

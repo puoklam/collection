@@ -13,21 +13,21 @@ type rwLocker interface {
 	RUnlock()
 }
 
-type Interface[T comparable] interface {
+type Set[T comparable] interface {
 	Len() int
 	Has(eles ...T) bool
 	Add(eles ...T)
 	Remove(eles ...T)
 	Clear()
 	Items() []T
-	Diff(ss Interface[T]) Interface[T]
-	IsSubset(ss Interface[T]) bool
-	IsSuperset(ss Interface[T]) bool
-	IsIdentical(ss Interface[T]) bool
-	IsDisjoint(ss Interface[T]) bool
+	Diff(ss Set[T]) Set[T]
+	IsSubset(ss Set[T]) bool
+	IsSuperset(ss Set[T]) bool
+	IsIdentical(ss Set[T]) bool
+	IsDisjoint(ss Set[T]) bool
 }
 
-func diff[T comparable](s1, s2 Interface[T]) Interface[T] {
+func diff[T comparable](s1, s2 Set[T]) Set[T] {
 	if l, ok := s1.(rwLocker); ok {
 		l.RLock()
 		defer l.RUnlock()
@@ -53,7 +53,7 @@ func diff[T comparable](s1, s2 Interface[T]) Interface[T] {
 	}
 }
 
-func isSubset[T comparable](s1, s2 Interface[T]) bool {
+func isSubset[T comparable](s1, s2 Set[T]) bool {
 	if l, ok := s1.(rwLocker); ok {
 		l.RLock()
 		defer l.RUnlock()
@@ -70,7 +70,7 @@ func isSubset[T comparable](s1, s2 Interface[T]) bool {
 	return true
 }
 
-func isDisjoint[T comparable](s1, s2 Interface[T]) bool {
+func isDisjoint[T comparable](s1, s2 Set[T]) bool {
 	if l, ok := s1.(rwLocker); ok {
 		l.RLock()
 		defer l.RUnlock()
@@ -87,7 +87,7 @@ func isDisjoint[T comparable](s1, s2 Interface[T]) bool {
 	return true
 }
 
-func Copy[T comparable](s Interface[T]) Interface[T] {
+func Copy[T comparable](s Set[T]) Set[T] {
 	if l, ok := s.(rwLocker); ok {
 		l.RLock()
 		defer l.RUnlock()
@@ -104,7 +104,7 @@ func Copy[T comparable](s Interface[T]) Interface[T] {
 	}
 }
 
-func Union[T comparable](sets ...Interface[T]) Interface[T] {
+func Union[T comparable](sets ...Set[T]) Set[T] {
 	for _, s := range sets {
 		if l, ok := s.(locker); ok {
 			l.Lock()
@@ -129,7 +129,7 @@ func Union[T comparable](sets ...Interface[T]) Interface[T] {
 	}
 }
 
-func Intersection[T comparable](s1, s2 Interface[T]) Interface[T] {
+func Intersection[T comparable](s1, s2 Set[T]) Set[T] {
 	if l, ok := s1.(rwLocker); ok {
 		l.RLock()
 		defer l.RUnlock()
