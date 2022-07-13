@@ -5,23 +5,10 @@ import (
 )
 
 func TestEvict(t *testing.T) {
-	// c := NewLRU[int, int](2)
-	// c.Put(1, 1)
-	// c.Put(2, 2)
-	// c.Put(3, 3)
-	// if _, ok := c.Get(1); ok {
-	// 	t.Errorf("Should be evicted")
-	// }
 	c := NewLRU[int, int](2)
 	c.Put(1, 1)
 	c.Put(2, 2)
-	c.Get(1)
 	c.Put(3, 3)
-	c.Get(2)
-	c.Put(4, 4)
-	c.Get(1)
-	c.Get(3)
-	c.Get(4)
 	if _, ok := c.Get(1); ok {
 		t.Errorf("Should be evicted")
 	}
