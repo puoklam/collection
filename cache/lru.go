@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type node[K comparable, V any] struct {
+type lruNode[K comparable, V any] struct {
 	k K
 	v V
 }
@@ -21,22 +21,22 @@ func NewLRU[K comparable, V any](cap int) *LRUCache[K, V] {
 	return new(LRUCache[K, V]).Init(cap)
 }
 
-func (c *LRUCache[K, V]) add(key K, val V) {
-	e := c.l.PushFront(&node[K, V]{
-		k: key,
-		v: val,
+func (c *LRUCache[K, V]) add(k K, v V) {
+	e := c.l.PushFront(&lruNode[K, V]{
+		k: k,
+		v: v,
 	})
-	c.m[key] = e
+	c.m[k] = e
 }
 
 func (c *LRUCache[K, V]) evict() {
-	n := c.l.Remove(c.l.Back()).(*node[K, V])
+	n := c.l.Remove(c.l.Back()).(*lruNode[K, V])
 	delete(c.m, n.k)
 }
 
 func (c *LRUCache[K, V]) Init(cap int) *LRUCache[K, V] {
 	if cap < 1 {
-		panic("invalid capacity")
+		panic(ErrInvalidCapacity)
 	}
 	c.cap = cap
 	c.m = make(map[K]*list.Element)
@@ -53,7 +53,7 @@ func (c *LRUCache[K, V]) Get(key K) (V, bool) {
 		return v, false
 	}
 	c.l.MoveToFront(e)
-	return e.Value.(*node[K, V]).v, true
+	return e.Value.(*lruNode[K, V]).v, true
 }
 
 func (c *LRUCache[K, V]) Put(key K, val V) {
@@ -61,13 +61,25 @@ func (c *LRUCache[K, V]) Put(key K, val V) {
 	defer c.mu.Unlock()
 	if e, ok := c.m[key]; ok {
 		c.l.MoveToFront(e)
-		e.Value.(*node[K, V]).v = val
+		e.Value.(*lruNode[K, V]).v = val
 		return
 	}
 	if c.l.Len() == c.cap {
 		c.evict()
 	}
 	c.add(key, val)
+}
+
+func (c *LRUCache[K, V]) Resize(cap int) {
+	if cap < 1 {
+		panic(ErrInvalidCapacity)
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.cap = cap
+	for c.l.Len() > c.cap {
+		c.evict()
+	}
 }
 
 func (c *LRUCache[_, _]) Cap() int {

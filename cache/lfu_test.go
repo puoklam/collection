@@ -1,20 +1,19 @@
 package cache
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestLRUEvict(t *testing.T) {
-	c := NewLRU[int, int](2)
+func TestLFUEvict(t *testing.T) {
+	c := NewLFU[int, int](2)
 	c.Put(1, 1)
 	c.Put(2, 2)
+	c.Get(1)
 	c.Put(3, 3)
-	if _, ok := c.Get(1); ok {
+	if _, ok := c.Get(2); ok {
 		t.Errorf("Should be evicted")
 	}
 }
 
-func TestLRUUpdate(t *testing.T) {
+func TestLFUUpdate(t *testing.T) {
 	c := NewLRU[int, int](2)
 	c.Put(1, 1)
 	c.Put(1, 2)
@@ -25,21 +24,22 @@ func TestLRUUpdate(t *testing.T) {
 	}
 }
 
-func TestLRUResize(t *testing.T) {
+func TestLFUResize(t *testing.T) {
 	c := NewLRU[int, int](5)
 	c.Put(1, 1)
 	c.Put(2, 2)
 	c.Put(3, 3)
 	c.Put(4, 4)
 	c.Put(5, 5)
+	c.Get(1)
 	c.Resize(3)
 	tests := []struct {
 		input int
 		want  bool
 	}{
-		{input: 1, want: false},
+		{input: 1, want: true},
 		{input: 2, want: false},
-		{input: 3, want: true},
+		{input: 3, want: false},
 		{input: 4, want: true},
 		{input: 5, want: true},
 	}
